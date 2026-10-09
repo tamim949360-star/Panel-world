@@ -1,0 +1,1413 @@
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PANEL WORLD - VIP Gaming Panels & Mods Hub</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts: Orbitron & Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Orbitron:wght@500;600;700;800;900&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        darkBg: '#08090d',
+                        darkCard: '#11141e',
+                        darkBorder: '#1f2436',
+                        neonRed: '#ff3b30',
+                        neonGlowRed: '#ff0055',
+                        neonCyan: '#00f0ff',
+                        neonBlue: '#0066ff',
+                        bKashPink: '#e2136e',
+                        nagadOrange: '#f7921e'
+                    },
+                    fontFamily: {
+                        orbitron: ['Orbitron', 'sans-serif'],
+                        inter: ['Inter', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #08090d;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #ff3b30;
+            border-radius: 4px;
+        }
+
+        /* Canvas background */
+        #bg-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* Glassmorphism effects */
+        .glass-panel {
+            background: rgba(17, 20, 30, 0.75);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .glass-card {
+            background: linear-gradient(145deg, rgba(23, 27, 41, 0.9), rgba(13, 15, 24, 0.95));
+            border: 1px solid rgba(255, 59, 48, 0.15);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .glass-card:hover {
+            border-color: rgba(255, 59, 48, 0.5);
+            box-shadow: 0 10px 30px -10px rgba(255, 0, 85, 0.3);
+            transform: translateY(-4px);
+        }
+
+        /* Glow Animations */
+        .glow-red {
+            box-shadow: 0 0 15px rgba(255, 59, 48, 0.4);
+        }
+
+        .glow-red-lg {
+            box-shadow: 0 0 25px rgba(255, 59, 48, 0.6), 0 0 50px rgba(255, 0, 85, 0.2);
+        }
+
+        .glow-cyan {
+            box-shadow: 0 0 15px rgba(0, 240, 255, 0.4);
+        }
+
+        .text-glow-red {
+            text-shadow: 0 0 10px rgba(255, 59, 48, 0.6), 0 0 20px rgba(255, 0, 85, 0.4);
+        }
+
+        .text-glow-cyan {
+            text-shadow: 0 0 10px rgba(0, 240, 255, 0.6);
+        }
+
+        /* Linear Gradient Text */
+        .gradient-text-red {
+            background: linear-gradient(135deg, #ffffff 0%, #ff3b30 50%, #ff0055 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .gradient-text-cyan {
+            background: linear-gradient(135deg, #ffffff 0%, #00f0ff 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* Shimmer Loading Effect */
+        @keyframes pulse-glow {
+            0%, 100% { opacity: 0.8; transform: scale(1); }
+            50% { opacity: 1; transform: scale(1.03); }
+        }
+
+        .pulse-animation {
+            animation: pulse-glow 2.5s infinite ease-in-out;
+        }
+
+        /* Toast Animation */
+        @keyframes slideInRight {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        .toast-enter {
+            animation: slideInRight 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+
+        /* Keyframe for Loader Bar */
+        @keyframes loadBar {
+            0% { width: 0%; }
+            50% { width: 70%; }
+            100% { width: 100%; }
+        }
+
+        .animate-progress {
+            animation: loadBar 2s ease-in-out forwards;
+        }
+    </style>
+</head>
+<body class="bg-darkBg text-gray-200 font-inter min-h-screen relative overflow-x-hidden select-none">
+
+    <canvas id="bg-canvas"></canvas>
+
+    <div id="splash-screen" class="fixed inset-0 z-50 bg-darkBg flex flex-col items-center justify-center transition-opacity duration-700">
+        <div class="relative flex flex-col items-center">
+            <!-- Pulsing Logo Ring -->
+            <div class="relative w-32 h-32 rounded-full flex items-center justify-center border-2 border-neonRed/40 p-2 shadow-[0_0_50px_rgba(255,59,48,0.3)] mb-6">
+                <div class="w-full h-full rounded-full bg-gradient-to-tr from-red-900 to-darkCard flex items-center justify-center overflow-hidden relative border border-neonRed/60">
+                    <i class="fa-solid fa-gamepad text-5xl text-neonRed animate-pulse"></i>
+                    <div class="absolute inset-0 bg-gradient-to-b from-transparent via-red-500/10 to-transparent animate-spin"></div>
+                </div>
+            </div>
+            
+            <h1 class="font-orbitron text-3xl font-black tracking-wider text-white mb-1">
+                PANEL <span class="text-neonRed">WORLD</span>
+            </h1>
+            <p class="font-orbitron text-xs tracking-[0.3em] text-neonCyan mb-8 uppercase text-glow-cyan">System Initializing</p>
+            
+            <!-- Progress Bar -->
+            <div class="w-64 h-1.5 bg-darkBorder rounded-full overflow-hidden p-0.5 border border-white/10 shadow-[0_0_15px_rgba(255,59,48,0.2)]">
+                <div class="h-full bg-gradient-to-r from-neonRed via-pink-500 to-neonCyan rounded-full animate-progress"></div>
+            </div>
+        </div>
+    </div>
+
+    <header class="sticky top-0 z-40 glass-panel border-b border-darkBorder">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+            <!-- Brand Logo -->
+            <a href="#" class="flex items-center gap-3 group">
+                <div class="w-11 h-11 rounded-xl bg-gradient-to-br from-red-600 to-red-950 flex items-center justify-center border border-neonRed/50 shadow-[0_0_15px_rgba(255,59,48,0.4)] group-hover:scale-105 transition-transform">
+                    <i class="fa-solid fa-crosshairs text-xl text-white"></i>
+                </div>
+                <div>
+                    <span class="font-orbitron font-extrabold text-xl tracking-wider text-white block leading-none">
+                        PANEL <span class="text-neonRed">WORLD</span>
+                    </span>
+                    <span class="text-[10px] tracking-widest text-gray-400 font-orbitron uppercase">VIP GAMING HUB</span>
+                </div>
+            </a>
+
+            <!-- Desktop Navigation Links -->
+            <nav class="hidden md:flex items-center gap-8">
+                <a href="#home" class="font-orbitron text-sm font-medium text-white hover:text-neonRed transition-colors flex items-center gap-2">
+                    <i class="fa-solid fa-house text-xs text-neonRed"></i> Home
+                </a>
+                <a href="#panels" class="font-orbitron text-sm font-medium text-gray-300 hover:text-neonRed transition-colors flex items-center gap-2">
+                    <i class="fa-solid fa-cubes text-xs text-neonRed"></i> Panels
+                </a>
+                <a href="javascript:void(0)" onclick="openWalletModal()" class="font-orbitron text-sm font-medium text-gray-300 hover:text-neonRed transition-colors flex items-center gap-2">
+                    <i class="fa-solid fa-wallet text-xs text-neonRed"></i> Add Funds
+                </a>
+                <a href="javascript:void(0)" onclick="openMyOrdersModal()" class="font-orbitron text-sm font-medium text-gray-300 hover:text-neonRed transition-colors flex items-center gap-2">
+                    <i class="fa-solid fa-box-archive text-xs text-neonRed"></i> My Orders
+                </a>
+            </nav>
+
+            <!-- Wallet Balance & User Action -->
+            <div class="flex items-center gap-3">
+                <!-- Live Wallet Widget -->
+                <div onclick="openWalletModal()" class="cursor-pointer bg-darkCard border border-darkBorder hover:border-neonRed/50 px-3.5 py-1.5 rounded-xl flex items-center gap-2.5 transition-all shadow-inner">
+                    <div class="w-7 h-7 rounded-lg bg-green-500/10 border border-green-500/30 flex items-center justify-center">
+                        <i class="fa-solid fa-coins text-green-400 text-xs"></i>
+                    </div>
+                    <div>
+                        <div class="text-[10px] text-gray-400 leading-none">Balance</div>
+                        <div class="text-xs font-bold text-green-400 font-orbitron" id="header-balance-text">৳ 500 BDT</div>
+                    </div>
+                    <button class="w-6 h-6 rounded-lg bg-neonRed/20 hover:bg-neonRed text-neonRed hover:text-white flex items-center justify-center text-xs transition-colors">
+                        <i class="fa-solid fa-plus"></i>
+                    </button>
+                </div>
+
+                <!-- Profile / Login Button -->
+                <button onclick="openLoginModal()" id="user-profile-btn" class="hidden sm:flex items-center gap-2 bg-gradient-to-r from-red-600 to-neonRed hover:from-red-500 hover:to-red-600 text-white font-orbitron text-xs font-bold px-4 py-2.5 rounded-xl shadow-[0_0_15px_rgba(255,59,48,0.3)] transition-all">
+                    <i class="fa-solid fa-user"></i>
+                    <span id="user-btn-label">Login</span>
+                </button>
+
+                <!-- Mobile Hamburger Button -->
+                <button onclick="toggleMobileMenu()" class="md:hidden text-gray-300 hover:text-white p-2 rounded-lg bg-darkCard border border-darkBorder focus:outline-none">
+                    <i class="fa-solid fa-bars-staggered text-lg"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <div id="mobile-menu-drawer" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-md hidden transition-opacity duration-300">
+        <div class="fixed right-0 top-0 bottom-0 w-80 bg-darkCard border-l border-darkBorder p-6 flex flex-col justify-between shadow-2xl transform transition-transform duration-300">
+            <div>
+                <!-- Header -->
+                <div class="flex items-center justify-between pb-6 border-b border-darkBorder mb-6">
+                    <div class="flex items-center gap-3">
+                        <div class="w-9 h-9 rounded-lg bg-neonRed/20 flex items-center justify-center border border-neonRed/40">
+                            <i class="fa-solid fa-gamepad text-neonRed"></i>
+                        </div>
+                        <span class="font-orbitron font-bold text-lg text-white">PANEL WORLD</span>
+                    </div>
+                    <button onclick="toggleMobileMenu()" class="text-gray-400 hover:text-white p-2 text-xl">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
+                </div>
+
+                <!-- User Greeting -->
+                <div class="bg-darkBg p-3.5 rounded-xl border border-darkBorder flex items-center gap-3 mb-6">
+                    <div class="w-10 h-10 rounded-full bg-neonRed/10 border border-neonRed/30 flex items-center justify-center text-neonRed font-bold font-orbitron" id="mobile-avatar">
+                        <i class="fa-solid fa-user"></i>
+                    </div>
+                    <div>
+                        <p class="text-xs text-gray-400">Welcome Back</p>
+                        <p class="text-sm font-bold text-white font-orbitron" id="mobile-username-text">Guest User</p>
+                    </div>
+                </div>
+
+                <!-- Nav Links -->
+                <div class="space-y-3 font-orbitron">
+                    <a href="#home" onclick="toggleMobileMenu()" class="flex items-center gap-3 px-4 py-3 rounded-xl bg-neonRed/10 text-white border border-neonRed/30">
+                        <i class="fa-solid fa-house text-neonRed"></i> Home
+                    </a>
+                    <a href="#panels" onclick="toggleMobileMenu()" class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-darkBg text-gray-300 hover:text-white border border-transparent transition-all">
+                        <i class="fa-solid fa-cubes text-neonRed"></i> All Panels
+                    </a>
+                    <button onclick="toggleMobileMenu(); openWalletModal()" class="w-full text-left flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-darkBg text-gray-300 hover:text-white border border-transparent transition-all">
+                        <i class="fa-solid fa-wallet text-neonRed"></i> Wallet & Deposit
+                    </button>
+                    <button onclick="toggleMobileMenu(); openMyOrdersModal()" class="w-full text-left flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-darkBg text-gray-300 hover:text-white border border-transparent transition-all">
+                        <i class="fa-solid fa-box-archive text-neonRed"></i> My License Keys
+                    </button>
+                    <button onclick="toggleMobileMenu(); openLoginModal()" class="w-full text-left flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-darkBg text-gray-300 hover:text-white border border-transparent transition-all">
+                        <i class="fa-solid fa-right-to-bracket text-neonRed"></i> Login / Register
+                    </button>
+                </div>
+            </div>
+
+            <!-- Drawer Footer Info -->
+            <div class="pt-6 border-t border-darkBorder">
+                <p class="text-xs text-gray-500 text-center">PANEL WORLD v2.4 Premium Hub</p>
+            </div>
+        </div>
+    </div>
+
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 relative z-10" id="home">
+        
+        <!-- Hero Slider Frame -->
+        <div class="relative rounded-3xl overflow-hidden glass-card p-1 border border-neonRed/30 mb-12 shadow-[0_0_40px_rgba(255,59,48,0.15)]">
+            <div class="relative min-h-[260px] sm:min-h-[340px] md:min-h-[400px] rounded-2xl overflow-hidden bg-gradient-to-r from-red-950 via-darkCard to-black flex items-center">
+                
+                <!-- Slide 1 -->
+                <div class="hero-slide absolute inset-0 transition-opacity duration-700 opacity-100 flex items-center px-6 sm:px-12 md:px-16" id="slide-0">
+                    <div class="absolute inset-0 bg-[radial-gradient(circle_at_30%_50%,rgba(255,59,48,0.25),transparent_70%)]"></div>
+                    <div class="relative z-10 max-w-xl">
+                        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-neonRed/20 border border-neonRed/40 text-neonRed text-xs font-bold uppercase font-orbitron mb-3 animate-pulse">
+                            <i class="fa-solid fa-fire"></i> Hot Release
+                        </div>
+                        <h2 class="font-orbitron text-2xl sm:text-4xl md:text-5xl font-black text-white tracking-wide mb-3 leading-tight">
+                            PATO TEAM <br><span class="gradient-text-red">MOD MENU VIP</span>
+                        </h2>
+                        <p class="text-xs sm:text-sm text-gray-300 mb-6 line-clamp-2 sm:line-clamp-none">
+                            Includes AIMKILL, Silent Aimbot, Headshot Hack, Speed Hack, Ghost Mode & ESP Line Location. Undetectable Anti-Ban technology.
+                        </p>
+                        <div class="flex items-center gap-4">
+                            <button onclick="triggerDirectBuy('PATO TEAM MOD MENU', 320)" class="bg-gradient-to-r from-neonRed to-red-600 hover:from-red-500 hover:to-neonRed text-white font-orbitron text-xs sm:text-sm font-bold px-6 py-3 rounded-xl shadow-[0_0_20px_rgba(255,59,48,0.5)] transition-all transform hover:scale-105">
+                                Buy Now - ৳320 BDT
+                            </button>
+                            <button onclick="openDemoModal('PATO TEAM MOD MENU', 'https://www.youtube.com/embed/dQw4w9WgXcQ')" class="bg-darkCard hover:bg-darkBorder text-gray-200 border border-darkBorder font-orbitron text-xs sm:text-sm font-semibold px-5 py-3 rounded-xl transition-all">
+                                <i class="fa-solid fa-play text-neonRed mr-2"></i> Watch Demo
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Slide 2 -->
+                <div class="hero-slide absolute inset-0 transition-opacity duration-700 opacity-0 flex items-center px-6 sm:px-12 md:px-16" id="slide-1">
+                    <div class="absolute inset-0 bg-[radial-gradient(circle_at_30%_50%,rgba(0,240,255,0.25),transparent_70%)]"></div>
+                    <div class="relative z-10 max-w-xl">
+                        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-neonCyan/20 border border-neonCyan/40 text-neonCyan text-xs font-bold uppercase font-orbitron mb-3">
+                            <i class="fa-solid fa-bolt"></i> Auto Guild Bot
+                        </div>
+                        <h2 class="font-orbitron text-2xl sm:text-4xl md:text-5xl font-black text-white tracking-wide mb-3 leading-tight">
+                            FF GUILD <br><span class="gradient-text-cyan">GLORY BOT LV.7</span>
+                        </h2>
+                        <p class="text-xs sm:text-sm text-gray-300 mb-6 line-clamp-2 sm:line-clamp-none">
+                            Instant guild glory level up bot. 24/7 automated boosting, custom guild level up scripts, auto-up features for all tournaments.
+                        </p>
+                        <div class="flex items-center gap-4">
+                            <button onclick="triggerDirectBuy('GUILD GLORY BOT', 130)" class="bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-orbitron text-xs sm:text-sm font-bold px-6 py-3 rounded-xl shadow-[0_0_20px_rgba(0,240,255,0.4)] transition-all transform hover:scale-105">
+                                Buy Now - ৳130 BDT
+                            </button>
+                            <button onclick="openDemoModal('GUILD GLORY BOT', 'https://www.youtube.com/embed/dQw4w9WgXcQ')" class="bg-darkCard hover:bg-darkBorder text-gray-200 border border-darkBorder font-orbitron text-xs sm:text-sm font-semibold px-5 py-3 rounded-xl transition-all">
+                                <i class="fa-solid fa-play text-neonCyan mr-2"></i> Watch Demo
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Slide 3 -->
+                <div class="hero-slide absolute inset-0 transition-opacity duration-700 opacity-0 flex items-center px-6 sm:px-12 md:px-16" id="slide-2">
+                    <div class="absolute inset-0 bg-[radial-gradient(circle_at_30%_50%,rgba(168,85,247,0.25),transparent_70%)]"></div>
+                    <div class="relative z-10 max-w-xl">
+                        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple-500/20 border border-purple-500/40 text-purple-400 text-xs font-bold uppercase font-orbitron mb-3">
+                            <i class="fa-solid fa-shield-halved"></i> 100% Main ID Safe
+                        </div>
+                        <h2 class="font-orbitron text-2xl sm:text-4xl md:text-5xl font-black text-white tracking-wide mb-3 leading-tight">
+                            DRIP CLIENT <br><span class="text-purple-400">EXTERNAL WIRE</span>
+                        </h2>
+                        <p class="text-xs sm:text-sm text-gray-300 mb-6 line-clamp-2 sm:line-clamp-none">
+                            Non-root external wire mod menu. Smooth 120 FPS support, ESP Lines, Freeze Aim, and Auto-Headshot bypass.
+                        </p>
+                        <div class="flex items-center gap-4">
+                            <button onclick="triggerDirectBuy('DRIP CLIENT WIRE', 50)" class="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-orbitron text-xs sm:text-sm font-bold px-6 py-3 rounded-xl shadow-[0_0_20px_rgba(168,85,247,0.4)] transition-all transform hover:scale-105">
+                                Buy Now - ৳50 BDT
+                            </button>
+                            <button onclick="openDemoModal('DRIP CLIENT WIRE', 'https://www.youtube.com/embed/dQw4w9WgXcQ')" class="bg-darkCard hover:bg-darkBorder text-gray-200 border border-darkBorder font-orbitron text-xs sm:text-sm font-semibold px-5 py-3 rounded-xl transition-all">
+                                <i class="fa-solid fa-play text-purple-400 mr-2"></i> Watch Demo
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Slide Indicators -->
+                <div class="absolute bottom-4 left-1/2 -translate-x-1/2 flex items-center gap-2 z-20">
+                    <button onclick="setSlide(0)" class="slide-dot w-8 h-2 rounded-full bg-neonRed transition-all" id="dot-0"></button>
+                    <button onclick="setSlide(1)" class="slide-dot w-2 h-2 rounded-full bg-gray-600 transition-all" id="dot-1"></button>
+                    <button onclick="setSlide(2)" class="slide-dot w-2 h-2 rounded-full bg-gray-600 transition-all" id="dot-2"></button>
+                </div>
+            </div>
+        </div>
+
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8" id="panels">
+            <div>
+                <div class="flex items-center gap-2 text-neonRed font-orbitron text-xs tracking-widest uppercase">
+                    <span class="w-2 h-2 rounded-full bg-neonRed animate-ping"></span>
+                    Verified Game Hacks & Tools
+                </div>
+                <h3 class="font-orbitron text-2xl sm:text-3xl font-black text-white tracking-wide">
+                    OUR <span class="text-neonRed">PANELS</span>
+                </h3>
+            </div>
+
+            <!-- Category Tabs -->
+            <div class="flex items-center gap-2 overflow-x-auto pb-2 md:pb-0 no-scrollbar">
+                <button onclick="filterPanels('ALL')" class="filter-tab active-tab bg-gradient-to-r from-neonRed to-red-600 text-white font-orbitron text-xs font-bold px-4 py-2.5 rounded-xl shadow-[0_0_15px_rgba(255,59,48,0.3)] whitespace-nowrap transition-all" data-cat="ALL">
+                    ALL PANEL
+                </button>
+                <button onclick="filterPanels('NON ROOT')" class="filter-tab bg-darkCard hover:bg-darkBorder text-gray-400 hover:text-white font-orbitron text-xs font-semibold px-4 py-2.5 rounded-xl border border-darkBorder whitespace-nowrap transition-all" data-cat="NON ROOT">
+                    NON ROOT
+                </button>
+                <button onclick="filterPanels('ROOT')" class="filter-tab bg-darkCard hover:bg-darkBorder text-gray-400 hover:text-white font-orbitron text-xs font-semibold px-4 py-2.5 rounded-xl border border-darkBorder whitespace-nowrap transition-all" data-cat="ROOT">
+                    ROOT
+                </button>
+                <button onclick="filterPanels('PC MODS')" class="filter-tab bg-darkCard hover:bg-darkBorder text-gray-400 hover:text-white font-orbitron text-xs font-semibold px-4 py-2.5 rounded-xl border border-darkBorder whitespace-nowrap transition-all" data-cat="PC MODS">
+                    PC MODS
+                </button>
+                <button onclick="filterPanels('MORE')" class="filter-tab bg-darkCard hover:bg-darkBorder text-gray-400 hover:text-white font-orbitron text-xs font-semibold px-4 py-2.5 rounded-xl border border-darkBorder whitespace-nowrap transition-all" data-cat="MORE">
+                    MORE ▼
+                </button>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6" id="products-grid">
+            <!-- Product Cards generated dynamically via JavaScript -->
+        </div>
+    </main>
+
+    <div id="order-modal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-md hidden flex items-center justify-center p-4">
+        <div class="glass-panel w-full max-w-md rounded-3xl p-6 border border-neonRed/30 shadow-[0_0_50px_rgba(255,59,48,0.2)] relative animate-fade-in">
+            <!-- Modal Header -->
+            <div class="flex items-center justify-between pb-4 border-b border-darkBorder mb-6">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-neonRed/20 border border-neonRed/40 flex items-center justify-center text-neonRed text-lg">
+                        <i class="fa-solid fa-cart-shopping"></i>
+                    </div>
+                    <div>
+                        <h4 class="font-orbitron font-bold text-lg text-white">Confirm Order</h4>
+                        <p class="text-xs text-gray-400">Select duration and proceed</p>
+                    </div>
+                </div>
+                <button onclick="closeOrderModal()" class="w-8 h-8 rounded-full bg-darkCard hover:bg-red-500/20 text-gray-400 hover:text-neonRed flex items-center justify-center transition-colors">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <!-- Selected Panel Info Box -->
+            <div class="bg-darkBg p-4 rounded-2xl border border-darkBorder mb-5">
+                <div class="flex justify-between items-center mb-1">
+                    <span class="font-orbitron font-bold text-base text-white" id="modal-panel-title">DRIP CLIENT WIRE</span>
+                    <span class="font-orbitron font-extrabold text-lg text-green-400" id="modal-panel-price">৳ 50 BDT</span>
+                </div>
+                <p class="text-xs text-gray-400" id="modal-panel-tag">NON ROOT DRIP WIRE VERSION</p>
+            </div>
+
+            <!-- Duration Select -->
+            <div class="mb-5">
+                <label class="block text-xs font-orbitron font-semibold text-gray-300 mb-2">Select Duration</label>
+                <div class="relative">
+                    <select id="duration-select" onchange="recalculateTotalPrice()" class="w-full bg-darkBg border border-darkBorder focus:border-neonRed text-white text-sm rounded-xl p-3 font-orbitron appearance-none focus:outline-none cursor-pointer">
+                        <option value="1">6 HOURS - ৳ 50 BDT</option>
+                        <option value="2">1 DAY - ৳ 100 BDT</option>
+                        <option value="5">7 DAYS - ৳ 250 BDT</option>
+                        <option value="15">30 DAYS - ৳ 700 BDT</option>
+                    </select>
+                    <div class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none">
+                        <i class="fa-solid fa-chevron-down text-xs"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quantity Picker -->
+            <div class="mb-6">
+                <label class="block text-xs font-orbitron font-semibold text-gray-300 mb-2">Quantity *</label>
+                <div class="flex items-center bg-darkBg rounded-xl border border-darkBorder p-1">
+                    <button onclick="adjustQuantity(-1)" class="w-10 h-10 rounded-lg bg-darkCard hover:bg-darkBorder text-white text-base font-bold flex items-center justify-center transition-colors">
+                        <i class="fa-solid fa-minus text-xs"></i>
+                    </button>
+                    <div class="flex-1 text-center font-orbitron font-bold text-white text-base" id="quantity-display">1</div>
+                    <button onclick="adjustQuantity(1)" class="w-10 h-10 rounded-lg bg-darkCard hover:bg-darkBorder text-white text-base font-bold flex items-center justify-center transition-colors">
+                        <i class="fa-solid fa-plus text-xs"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Order Total Display -->
+            <div class="flex justify-between items-center py-3 border-t border-darkBorder mb-6">
+                <span class="text-xs font-orbitron text-gray-400">Total Amount:</span>
+                <span class="text-xl font-orbitron font-extrabold text-neonRed text-glow-red" id="final-total-price">৳ 50 BDT</span>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="space-y-3">
+                <button onclick="payWithWalletDirect()" class="w-full bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-500 hover:to-emerald-500 text-white font-orbitron font-bold py-3.5 rounded-xl shadow-[0_0_20px_rgba(34,197,94,0.3)] transition-all flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-wallet"></i> Pay with Wallet Balance
+                </button>
+                <button onclick="proceedToPaymentGateway()" class="w-full bg-gradient-to-r from-neonRed to-red-600 hover:from-red-500 hover:to-neonRed text-white font-orbitron font-bold py-3.5 rounded-xl shadow-[0_0_20px_rgba(255,59,48,0.4)] transition-all">
+                    Continue to Gateway Payment
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div id="payment-gateway-modal" class="fixed inset-0 z-50 bg-black/85 backdrop-blur-md hidden flex items-center justify-center p-4">
+        <div class="glass-panel w-full max-w-lg rounded-3xl p-6 sm:p-8 border border-blue-500/30 shadow-[0_0_50px_rgba(0,102,255,0.2)] relative">
+            
+            <!-- Gateway Header -->
+            <div class="flex items-center justify-between pb-4 border-b border-darkBorder mb-6">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-blue-500/20 border border-blue-500/40 flex items-center justify-center text-blue-400">
+                        <i class="fa-solid fa-shield-halved text-lg"></i>
+                    </div>
+                    <div>
+                        <h4 class="font-orbitron font-bold text-lg text-white">PAYMENT GATEWAY</h4>
+                        <p class="text-xs text-gray-400">Merchant Trx ID: <span class="font-mono text-neonCyan" id="merchant-trx-id">TRX-9823471</span></p>
+                    </div>
+                </div>
+                <div class="text-right">
+                    <div class="text-xs text-gray-400">Amount Due</div>
+                    <div class="font-orbitron font-extrabold text-lg text-neonCyan" id="gateway-pay-amount">50 BDT</div>
+                </div>
+            </div>
+
+            <!-- STEP 1: Select Payment Provider -->
+            <div id="gateway-step-1" class="space-y-5">
+                <label class="block text-xs font-orbitron font-semibold text-gray-300">1. Select Payment Method</label>
+                <div class="grid grid-cols-2 gap-3">
+                    <div onclick="selectPaymentProvider('bKash')" class="provider-card border-2 border-neonRed bg-darkBg p-3.5 rounded-2xl cursor-pointer flex flex-col items-center gap-2 hover:border-neonRed transition-all shadow-[0_0_15px_rgba(255,59,48,0.2)]">
+                        <div class="w-12 h-12 rounded-xl bg-bKashPink/10 flex items-center justify-center text-bKashPink font-bold font-orbitron text-xl">
+                            <i class="fa-solid fa-mobile-screen"></i>
+                        </div>
+                        <span class="font-orbitron text-xs font-bold text-white">bKash Personal</span>
+                    </div>
+
+                    <div onclick="selectPaymentProvider('Nagad')" class="provider-card border border-darkBorder bg-darkBg p-3.5 rounded-2xl cursor-pointer flex flex-col items-center gap-2 hover:border-nagadOrange transition-all">
+                        <div class="w-12 h-12 rounded-xl bg-nagadOrange/10 flex items-center justify-center text-nagadOrange font-bold font-orbitron text-xl">
+                            <i class="fa-solid fa-wallet"></i>
+                        </div>
+                        <span class="font-orbitron text-xs font-bold text-white">Nagad Personal</span>
+                    </div>
+
+                    <div onclick="selectPaymentProvider('Rocket')" class="provider-card border border-darkBorder bg-darkBg p-3.5 rounded-2xl cursor-pointer flex flex-col items-center gap-2 hover:border-purple-500 transition-all">
+                        <div class="w-12 h-12 rounded-xl bg-purple-500/10 flex items-center justify-center text-purple-400 font-bold font-orbitron text-xl">
+                            <i class="fa-solid fa-building-columns"></i>
+                        </div>
+                        <span class="font-orbitron text-xs font-bold text-white">Rocket Personal</span>
+                    </div>
+
+                    <div onclick="selectPaymentProvider('Upay')" class="provider-card border border-darkBorder bg-darkBg p-3.5 rounded-2xl cursor-pointer flex flex-col items-center gap-2 hover:border-yellow-500 transition-all">
+                        <div class="w-12 h-12 rounded-xl bg-yellow-500/10 flex items-center justify-center text-yellow-400 font-bold font-orbitron text-xl">
+                            <i class="fa-solid fa-paper-plane"></i>
+                        </div>
+                        <span class="font-orbitron text-xs font-bold text-white">Upay Personal</span>
+                    </div>
+                </div>
+
+                <button onclick="goToGatewayStep(2)" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-orbitron font-bold py-3.5 rounded-xl transition-all shadow-[0_0_20px_rgba(0,102,255,0.4)]">
+                    Next Step <i class="fa-solid fa-arrow-right ml-2"></i>
+                </button>
+            </div>
+
+            <!-- STEP 2: Instruction & Merchant Number Copy -->
+            <div id="gateway-step-2" class="hidden space-y-5">
+                <div class="bg-yellow-500/10 border border-yellow-500/30 p-4 rounded-2xl flex items-start gap-3">
+                    <i class="fa-solid fa-circle-info text-yellow-400 text-lg mt-0.5"></i>
+                    <p class="text-xs text-gray-300 leading-relaxed">
+                        Open your <strong class="text-white font-orbitron" id="selected-provider-label">bKash</strong> app, select <strong class="text-neonCyan">Send Money</strong> option, and send exact <strong class="text-neonRed" id="step2-amount">50 BDT</strong> to the number below.
+                    </p>
+                </div>
+
+                <!-- Number Box -->
+                <div class="bg-darkBg p-4 rounded-2xl border border-darkBorder flex items-center justify-between">
+                    <div>
+                        <span class="text-[10px] text-gray-400 block uppercase tracking-wider font-orbitron">SEND MONEY NUMBER</span>
+                        <span class="font-orbitron font-extrabold text-lg text-white tracking-widest" id="merchant-phone">01324091270</span>
+                    </div>
+                    <button onclick="copyToClipboard('01324091270', 'Number Copied!')" class="bg-neonBlue/20 hover:bg-neonBlue text-neonBlue hover:text-white font-orbitron text-xs font-bold px-3.5 py-2 rounded-xl border border-neonBlue/40 transition-colors">
+                        <i class="fa-regular fa-copy"></i> Copy
+                    </button>
+                </div>
+
+                <!-- Exact Amount Box -->
+                <div class="bg-darkBg p-4 rounded-2xl border border-darkBorder flex items-center justify-between">
+                    <div>
+                        <span class="text-[10px] text-gray-400 block uppercase tracking-wider font-orbitron">EXACT AMOUNT</span>
+                        <span class="font-orbitron font-extrabold text-lg text-neonCyan" id="exact-amount-label">50 BDT</span>
+                    </div>
+                    <button onclick="copyToClipboard('50', 'Amount Copied!')" class="bg-neonCyan/20 hover:bg-neonCyan text-neonCyan hover:text-black font-orbitron text-xs font-bold px-3.5 py-2 rounded-xl border border-neonCyan/40 transition-colors">
+                        <i class="fa-regular fa-copy"></i> Copy
+                    </button>
+                </div>
+
+                <div class="flex gap-3">
+                    <button onclick="goToGatewayStep(1)" class="w-1/3 bg-darkCard border border-darkBorder hover:bg-darkBorder text-gray-300 font-orbitron font-semibold py-3.5 rounded-xl transition-all">
+                        Back
+                    </button>
+                    <button onclick="goToGatewayStep(3)" class="w-2/3 bg-blue-600 hover:bg-blue-500 text-white font-orbitron font-bold py-3.5 rounded-xl transition-all">
+                        Enter Trx ID <i class="fa-solid fa-arrow-right ml-2"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- STEP 3: Enter Transaction ID -->
+            <div id="gateway-step-3" class="hidden space-y-5">
+                <div>
+                    <label class="block text-xs font-orbitron font-semibold text-gray-300 mb-2">Enter Transaction ID (Trx ID) *</label>
+                    <input type="text" id="trx-id-input" placeholder="e.g. 8N70O2M4RB" class="w-full bg-darkBg border border-darkBorder focus:border-neonCyan text-white text-base rounded-xl p-3.5 font-mono tracking-wider focus:outline-none uppercase">
+                    <p class="text-[10px] text-gray-400 mt-1.5">You will receive the Trx ID in SMS after completing Send Money.</p>
+                </div>
+
+                <div class="flex gap-3">
+                    <button onclick="goToGatewayStep(2)" class="w-1/3 bg-darkCard border border-darkBorder hover:bg-darkBorder text-gray-300 font-orbitron font-semibold py-3.5 rounded-xl transition-all">
+                        Back
+                    </button>
+                    <button onclick="submitTransactionVerification()" class="w-2/3 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-500 hover:to-emerald-500 text-white font-orbitron font-bold py-3.5 rounded-xl shadow-[0_0_20px_rgba(34,197,94,0.4)] transition-all">
+                        Verify & Submit
+                    </button>
+                </div>
+            </div>
+
+            <button onclick="closePaymentGateway()" class="absolute top-6 right-6 text-gray-400 hover:text-white">
+                <i class="fa-solid fa-xmark text-lg"></i>
+            </button>
+        </div>
+    </div>
+
+    <div id="wallet-modal" class="fixed inset-0 z-50 bg-black/85 backdrop-blur-md hidden flex items-center justify-center p-4">
+        <div class="glass-panel w-full max-w-lg rounded-3xl p-6 sm:p-8 border border-green-500/30 shadow-[0_0_50px_rgba(34,197,94,0.15)] relative max-h-[90vh] overflow-y-auto">
+            <!-- Header -->
+            <div class="flex items-center justify-between pb-4 border-b border-darkBorder mb-6">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-green-500/20 border border-green-500/40 flex items-center justify-center text-green-400 text-lg">
+                        <i class="fa-solid fa-wallet"></i>
+                    </div>
+                    <div>
+                        <h4 class="font-orbitron font-bold text-lg text-white">MY WALLET</h4>
+                        <p class="text-xs text-gray-400">Deposit & Transaction History</p>
+                    </div>
+                </div>
+                <button onclick="closeWalletModal()" class="text-gray-400 hover:text-white">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+
+            <!-- Stats Overview Cards -->
+            <div class="grid grid-cols-2 gap-4 mb-6">
+                <div class="bg-darkBg p-4 rounded-2xl border border-darkBorder">
+                    <span class="text-[10px] font-orbitron text-gray-400 uppercase">TOTAL DEPOSITED</span>
+                    <div class="text-2xl font-orbitron font-extrabold text-green-400 mt-1" id="wallet-deposited-text">৳ 500</div>
+                </div>
+                <div class="bg-darkBg p-4 rounded-2xl border border-darkBorder">
+                    <span class="text-[10px] font-orbitron text-gray-400 uppercase">TOTAL SPENT</span>
+                    <div class="text-2xl font-orbitron font-extrabold text-neonRed mt-1" id="wallet-spent-text">৳ 0</div>
+                </div>
+            </div>
+
+            <!-- Add Funds Form -->
+            <div class="bg-darkBg p-5 rounded-2xl border border-darkBorder mb-6">
+                <h5 class="font-orbitron text-xs font-bold text-white uppercase tracking-wider mb-3 flex items-center gap-2">
+                    <i class="fa-solid fa-plus-circle text-green-400"></i> Add Funds (৳10 - ৳10,000)
+                </h5>
+
+                <div class="relative mb-4">
+                    <input type="number" id="custom-deposit-input" placeholder="Enter amount..." class="w-full bg-darkCard border border-darkBorder focus:border-green-500 text-white font-orbitron text-base rounded-xl p-3.5 focus:outline-none">
+                    <span class="absolute right-4 top-1/2 -translate-y-1/2 font-orbitron text-xs text-gray-400">BDT</span>
+                </div>
+
+                <!-- Quick Amount Buttons -->
+                <div class="grid grid-cols-3 gap-2 mb-4">
+                    <button onclick="setDepositPreset(50)" class="bg-darkCard hover:bg-darkBorder text-gray-300 font-orbitron text-xs font-bold py-2 rounded-xl border border-darkBorder transition-colors">৳ 50</button>
+                    <button onclick="setDepositPreset(100)" class="bg-darkCard hover:bg-darkBorder text-gray-300 font-orbitron text-xs font-bold py-2 rounded-xl border border-darkBorder transition-colors">৳ 100</button>
+                    <button onclick="setDepositPreset(200)" class="bg-darkCard hover:bg-darkBorder text-gray-300 font-orbitron text-xs font-bold py-2 rounded-xl border border-darkBorder transition-colors">৳ 200</button>
+                    <button onclick="setDepositPreset(500)" class="bg-darkCard hover:bg-darkBorder text-gray-300 font-orbitron text-xs font-bold py-2 rounded-xl border border-darkBorder transition-colors">৳ 500</button>
+                    <button onclick="setDepositPreset(1000)" class="bg-darkCard hover:bg-darkBorder text-gray-300 font-orbitron text-xs font-bold py-2 rounded-xl border border-darkBorder transition-colors">৳ 1,000</button>
+                    <button onclick="setDepositPreset(2000)" class="bg-darkCard hover:bg-darkBorder text-gray-300 font-orbitron text-xs font-bold py-2 rounded-xl border border-darkBorder transition-colors">৳ 2,000</button>
+                </div>
+
+                <button onclick="initiateDepositGateway()" class="w-full bg-gradient-to-r from-red-600 to-neonRed hover:from-red-500 hover:to-red-600 text-white font-orbitron text-xs font-bold py-3.5 rounded-xl shadow-[0_0_15px_rgba(255,59,48,0.3)] transition-all flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-credit-card"></i> Proceed to Payment
+                </button>
+            </div>
+
+            <!-- Transaction History Log -->
+            <div>
+                <h5 class="font-orbitron text-xs font-bold text-gray-300 uppercase tracking-wider mb-3">Recent Transactions</h5>
+                <div class="space-y-2 max-h-40 overflow-y-auto pr-1" id="tx-history-list">
+                    <!-- Transactions dynamically populated -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="orders-modal" class="fixed inset-0 z-50 bg-black/85 backdrop-blur-md hidden flex items-center justify-center p-4">
+        <div class="glass-panel w-full max-w-2xl rounded-3xl p-6 sm:p-8 border border-neonRed/30 shadow-[0_0_50px_rgba(255,59,48,0.2)] relative max-h-[90vh] overflow-y-auto">
+            <div class="flex items-center justify-between pb-4 border-b border-darkBorder mb-6">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-neonRed/20 border border-neonRed/40 flex items-center justify-center text-neonRed">
+                        <i class="fa-solid fa-box-open text-lg"></i>
+                    </div>
+                    <div>
+                        <h4 class="font-orbitron font-bold text-lg text-white">MY PURCHASED KEYS</h4>
+                        <p class="text-xs text-gray-400">Active Panels & Downloads</p>
+                    </div>
+                </div>
+                <button onclick="closeMyOrdersModal()" class="text-gray-400 hover:text-white">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+
+            <!-- Orders Container -->
+            <div id="my-orders-list" class="space-y-4">
+                <!-- Populated dynamically -->
+            </div>
+        </div>
+    </div>
+
+    <div id="login-modal" class="fixed inset-0 z-50 bg-black/85 backdrop-blur-md hidden flex items-center justify-center p-4">
+        <div class="glass-panel w-full max-w-md rounded-3xl p-6 sm:p-8 border border-neonRed/30 shadow-[0_0_50px_rgba(255,59,48,0.2)] relative">
+            
+            <button onclick="closeLoginModal()" class="absolute top-6 right-6 text-gray-400 hover:text-white">
+                <i class="fa-solid fa-xmark text-lg"></i>
+            </button>
+
+            <div class="text-center mb-6">
+                <div class="w-14 h-14 rounded-2xl bg-gradient-to-tr from-red-600 to-neonRed mx-auto mb-3 flex items-center justify-center text-white text-2xl shadow-[0_0_20px_rgba(255,59,48,0.4)]">
+                    <i class="fa-solid fa-gamepad"></i>
+                </div>
+                <h4 class="font-orbitron font-black text-2xl text-white">Welcome <span class="text-neonRed">Back</span></h4>
+                <p class="text-xs text-gray-400">Login to access your premium panels</p>
+            </div>
+
+            <!-- Google OAuth Button -->
+            <button onclick="simulateGoogleLogin()" class="w-full bg-white hover:bg-gray-100 text-gray-900 font-inter font-semibold text-xs py-3.5 rounded-xl flex items-center justify-center gap-3 transition-all mb-5 shadow-md">
+                <svg class="w-4 h-4" viewBox="0 0 24 24">
+                    <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                    <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                    <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+                    <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+                </svg>
+                Continue with Google
+            </button>
+
+            <div class="relative flex py-2 items-center mb-5">
+                <div class="flex-grow border-t border-darkBorder"></div>
+                <span class="flex-shrink mx-4 text-[10px] text-gray-500 font-orbitron uppercase">or email</span>
+                <div class="flex-grow border-t border-darkBorder"></div>
+            </div>
+
+            <!-- Login Inputs -->
+            <form onsubmit="handleLoginSubmit(event)" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-orbitron text-gray-300 mb-1.5">Email</label>
+                    <input type="email" required id="login-email" placeholder="you@example.com" class="w-full bg-darkBg border border-darkBorder focus:border-neonRed text-white text-sm rounded-xl p-3 focus:outline-none">
+                </div>
+
+                <div>
+                    <div class="flex justify-between items-center mb-1.5">
+                        <label class="text-xs font-orbitron text-gray-300">Password</label>
+                        <a href="javascript:void(0)" class="text-xs font-orbitron text-neonRed hover:underline">Forgot?</a>
+                    </div>
+                    <input type="password" required id="login-password" placeholder="Your password" class="w-full bg-darkBg border border-darkBorder focus:border-neonRed text-white text-sm rounded-xl p-3 focus:outline-none">
+                </div>
+
+                <div class="flex items-center gap-2">
+                    <input type="checkbox" id="remember-me" class="rounded bg-darkBg border-darkBorder text-neonRed focus:ring-0">
+                    <label for="remember-me" class="text-xs text-gray-400">Remember me</label>
+                </div>
+
+                <!-- Cloudflare Captcha Widget Simulation -->
+                <div class="bg-darkBg p-3 rounded-xl border border-darkBorder flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                        <input type="checkbox" id="cf-captcha" required class="w-5 h-5 accent-neonRed cursor-pointer">
+                        <span class="text-xs font-medium text-gray-300">Verify you are human</span>
+                    </div>
+                    <div class="text-right">
+                        <span class="text-[9px] text-gray-500 font-orbitron block">CLOUDFLARE</span>
+                        <span class="text-[8px] text-gray-600 block">Privacy • Help</span>
+                    </div>
+                </div>
+
+                <button type="submit" class="w-full bg-gradient-to-r from-neonRed to-red-600 hover:from-red-500 hover:to-neonRed text-white font-orbitron text-xs font-bold py-3.5 rounded-xl shadow-[0_0_20px_rgba(255,59,48,0.4)] transition-all">
+                    Login
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <div id="demo-modal" class="fixed inset-0 z-50 bg-black/90 backdrop-blur-md hidden flex items-center justify-center p-4">
+        <div class="glass-panel w-full max-w-2xl rounded-3xl p-6 border border-neonRed/40 relative">
+            <div class="flex items-center justify-between pb-3 border-b border-darkBorder mb-4">
+                <h4 class="font-orbitron font-bold text-base text-white" id="demo-modal-title">Panel Demo Video</h4>
+                <button onclick="closeDemoModal()" class="text-gray-400 hover:text-white">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+            <div class="aspect-video w-full rounded-2xl overflow-hidden bg-black flex items-center justify-center border border-darkBorder">
+                <div class="text-center p-6">
+                    <i class="fa-solid fa-circle-play text-5xl text-neonRed mb-3 animate-pulse"></i>
+                    <p class="font-orbitron text-sm text-white font-bold mb-1">Live Gameplay Preview</p>
+                    <p class="text-xs text-gray-400">Showing VIP Headshot & ESP lines features in action</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="toast-container" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 pointer-events-none"></div>
+
+    <script>
+        const state = {
+            userLoggedIn: true,
+            userName: "MD AKASH",
+            walletBalance: 500,
+            totalDeposited: 500,
+            totalSpent: 0,
+            currentSlide: 0,
+            activeFilter: 'ALL',
+            selectedPanel: null,
+            orderQuantity: 1,
+            selectedDurationMultiplier: 1,
+            selectedPaymentProvider: 'bKash',
+            orders: [
+                {
+                    id: "ORD-88219",
+                    panelName: "DRIP CLIENT WIRE",
+                    key: "PW-VIP-8829-X9A2-FF01",
+                    expiry: "6 Hours",
+                    status: "ACTIVE"
+                }
+            ],
+            transactions: [
+                {
+                    id: "TRX-98231",
+                    type: "DEPOSIT",
+                    amount: 500,
+                    provider: "bKash",
+                    date: "Just Now",
+                    status: "SUCCESS"
+                }
+            ]
+        };
+
+        const panelsData = [
+            {
+                id: "p1",
+                title: "DRIP CLIENT WIRE",
+                category: "NON ROOT",
+                price: 50,
+                desc: "NON ROOT DRIP WIRE VERSION",
+                features: ["AIMBOT", "ESP LINE", "AUTO AIM", "FREEZE"],
+                badge: "POPULAR"
+            },
+            {
+                id: "p2",
+                title: "GUILD GLORY BOT",
+                category: "MORE",
+                price: 130,
+                desc: "FREE FIRE GUILD LEVEL UP BOT",
+                features: ["GUILD", "GLORY", "LEVEL", "AUTO-UP"],
+                badge: "BOT"
+            },
+            {
+                id: "p3",
+                title: "TROLL MODZ",
+                category: "NON ROOT",
+                price: 20,
+                desc: "NON ROOT AND IOS PANEL",
+                features: ["LOCATION", "AIMBOT", "NON ROOT", "IPHONE"],
+                badge: "IOS SAFE"
+            },
+            {
+                id: "p4",
+                title: "BALA MOD PANEL",
+                category: "NON ROOT",
+                price: 25,
+                desc: "NON ROOT MAIN ID SAFE",
+                features: ["NON ROOT", "EASY SETUP", "LOCATION", "FREEZE"],
+                badge: "SAFE"
+            },
+            {
+                id: "p5",
+                title: "AIM HACK PANEL",
+                category: "ROOT",
+                price: 20,
+                desc: "NON ROOT AND IOS PANEL",
+                features: ["IOS PANEL", "NON ROOT", "FREEZE", "LOCATION"],
+                badge: "VIP"
+            },
+            {
+                id: "p6",
+                title: "XREG NON ROOT",
+                category: "NON ROOT",
+                price: 20,
+                desc: "NON ROOT AND IOS PANEL",
+                features: ["ANTIBAN", "LOCATION", "FAKE LAG", "EASY SETUP"],
+                badge: "ANTI-BAN"
+            },
+            {
+                id: "p7",
+                title: "DRIP CLIENT APK",
+                category: "NON ROOT",
+                price: 50,
+                desc: "NON ROOT BEST PANEL",
+                features: ["SILENT AIM", "SILENT KILL", "SNIPER AIM", "ESP LOCATION"],
+                badge: "APK MOD"
+            },
+            {
+                id: "p8",
+                title: "PATO TEAM REGEDIT",
+                category: "ROOT",
+                price: 320,
+                desc: "NON ROOT PATO REGEDIT",
+                features: ["AUTO AIM", "HEADSHOT", "LOCATION", "SNIPER AIM"],
+                badge: "BEST SELLER"
+            },
+            {
+                id: "p9",
+                title: "BR MODS PC",
+                category: "PC MODS",
+                price: 150,
+                desc: "BR MODS PANEL FOR PC",
+                features: ["AUTO AIM", "SILENT AIM", "HEADSHOT", "LOCATION"],
+                badge: "PC EXCLUSIVE"
+            },
+            {
+                id: "p10",
+                title: "ANGRY MOD",
+                category: "ROOT",
+                price: 40,
+                desc: "ANTIBAN ROOT PANEL",
+                features: ["ANTIBAN", "HEADSHOT", "SNIPER AIM", "AUTO AIM"],
+                badge: "HOT"
+            }
+        ];
+
+        window.addEventListener('load', () => {
+            // Hide splash screen after initialization
+            setTimeout(() => {
+                const splash = document.getElementById('splash-screen');
+                splash.classList.add('opacity-0');
+                setTimeout(() => splash.remove(), 700);
+            }, 1800);
+
+            initCanvas();
+            renderProducts();
+            updateUI();
+            startHeroAutoSlide();
+        });
+
+        function initCanvas() {
+            const canvas = document.getElementById('bg-canvas');
+            const ctx = canvas.getContext('2d');
+            let width = canvas.width = window.innerWidth;
+            let height = canvas.height = window.innerHeight;
+
+            window.addEventListener('resize', () => {
+                width = canvas.width = window.innerWidth;
+                height = canvas.height = window.innerHeight;
+            });
+
+            const particles = Array.from({ length: 45 }, () => ({
+                x: Math.random() * width,
+                y: Math.random() * height,
+                vx: (Math.random() - 0.5) * 0.4,
+                vy: (Math.random() - 0.5) * 0.4,
+                radius: Math.random() * 2 + 0.5,
+                color: Math.random() > 0.5 ? 'rgba(255, 59, 48, ' : 'rgba(0, 240, 255, ',
+                alpha: Math.random() * 0.5 + 0.2
+            }));
+
+            function animate() {
+                ctx.clearRect(0, 0, width, height);
+
+                particles.forEach(p => {
+                    p.x += p.vx;
+                    p.y += p.vy;
+
+                    if (p.x < 0) p.x = width;
+                    if (p.x > width) p.x = 0;
+                    if (p.y < 0) p.y = height;
+                    if (p.y > height) p.y = 0;
+
+                    ctx.beginPath();
+                    ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+                    ctx.fillStyle = p.color + p.alpha + ')';
+                    ctx.fill();
+                });
+
+                requestAnimationFrame(animate);
+            }
+            animate();
+        }
+
+        function renderProducts() {
+            const grid = document.getElementById('products-grid');
+            grid.innerHTML = '';
+
+            const filtered = state.activeFilter === 'ALL' 
+                ? panelsData 
+                : panelsData.filter(p => p.category === state.activeFilter);
+
+            filtered.forEach(p => {
+                const card = document.createElement('div');
+                card.className = "glass-card rounded-2xl p-5 flex flex-col justify-between relative overflow-hidden group";
+                card.innerHTML = `
+                    <div>
+                        <!-- Top Badge & Icon -->
+                        <div class="flex items-center justify-between mb-3">
+                            <div class="w-8 h-8 rounded-lg bg-neonRed/10 border border-neonRed/30 flex items-center justify-center text-neonRed text-xs">
+                                <i class="fa-solid fa-microchip"></i>
+                            </div>
+                            <span class="text-[10px] font-orbitron font-bold px-2.5 py-1 rounded-full bg-neonRed/20 border border-neonRed/40 text-neonRed">
+                                ${p.badge}
+                            </span>
+                        </div>
+
+                        <!-- Panel Title & Description -->
+                        <h4 class="font-orbitron font-extrabold text-base text-white group-hover:text-neonRed transition-colors mb-1">
+                            ${p.title}
+                        </h4>
+                        <p class="text-[11px] text-gray-400 mb-4 line-clamp-1 font-inter">
+                            ${p.desc}
+                        </p>
+
+                        <!-- Feature Checklist Grid -->
+                        <div class="grid grid-cols-2 gap-1.5 mb-5 text-[11px] font-orbitron font-semibold text-gray-300">
+                            ${p.features.map(f => `
+                                <div class="flex items-center gap-1.5">
+                                    <i class="fa-solid fa-check text-green-400 text-[10px]"></i>
+                                    <span>${f}</span>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+
+                    <!-- Bottom Price & Actions -->
+                    <div class="pt-3 border-t border-darkBorder">
+                        <div class="flex justify-between items-center mb-3">
+                            <span class="text-[10px] text-gray-400 font-orbitron">PRICE:</span>
+                            <span class="font-orbitron font-extrabold text-green-400 text-sm">৳ ${p.price} BDT</span>
+                        </div>
+                        <div class="grid grid-cols-2 gap-2">
+                            <button onclick="openDemoModal('${p.title}', '')" class="bg-darkBg hover:bg-darkBorder text-gray-300 font-orbitron text-xs font-semibold py-2 rounded-xl border border-darkBorder transition-colors flex items-center justify-center gap-1">
+                                <i class="fa-solid fa-play text-neonRed text-[10px]"></i> Demo
+                            </button>
+                            <button onclick="openOrderModal('${p.id}')" class="bg-gradient-to-r from-neonRed to-red-600 hover:from-red-500 hover:to-neonRed text-white font-orbitron text-xs font-bold py-2 rounded-xl shadow-[0_0_10px_rgba(255,59,48,0.3)] transition-all">
+                                Buy Now
+                            </button>
+                        </div>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        function filterPanels(category) {
+            state.activeFilter = category;
+            document.querySelectorAll('.filter-tab').forEach(btn => {
+                if(btn.dataset.cat === category) {
+                    btn.className = "filter-tab active-tab bg-gradient-to-r from-neonRed to-red-600 text-white font-orbitron text-xs font-bold px-4 py-2.5 rounded-xl shadow-[0_0_15px_rgba(255,59,48,0.3)] whitespace-nowrap transition-all";
+                } else {
+                    btn.className = "filter-tab bg-darkCard hover:bg-darkBorder text-gray-400 hover:text-white font-orbitron text-xs font-semibold px-4 py-2.5 rounded-xl border border-darkBorder whitespace-nowrap transition-all";
+                }
+            });
+            renderProducts();
+        }
+
+        function setSlide(index) {
+            state.currentSlide = index;
+            document.querySelectorAll('.hero-slide').forEach((slide, idx) => {
+                slide.style.opacity = idx === index ? '1' : '0';
+            });
+            document.querySelectorAll('.slide-dot').forEach((dot, idx) => {
+                dot.className = idx === index 
+                    ? 'slide-dot w-8 h-2 rounded-full bg-neonRed transition-all'
+                    : 'slide-dot w-2 h-2 rounded-full bg-gray-600 transition-all';
+            });
+        }
+
+        function startHeroAutoSlide() {
+            setInterval(() => {
+                state.currentSlide = (state.currentSlide + 1) % 3;
+                setSlide(state.currentSlide);
+            }, 6000);
+        }
+
+        function openOrderModal(panelId) {
+            state.selectedPanel = panelsData.find(p => p.id === panelId);
+            state.orderQuantity = 1;
+            document.getElementById('quantity-display').innerText = '1';
+            document.getElementById('duration-select').value = '1';
+            
+            document.getElementById('modal-panel-title').innerText = state.selectedPanel.title;
+            document.getElementById('modal-panel-price').innerText = `৳ ${state.selectedPanel.price} BDT`;
+            document.getElementById('modal-panel-tag').innerText = state.selectedPanel.desc;
+
+            recalculateTotalPrice();
+            document.getElementById('order-modal').classList.remove('hidden');
+        }
+
+        function triggerDirectBuy(title, price) {
+            const found = panelsData.find(p => p.title.toUpperCase() === title.toUpperCase()) || {
+                id: "custom",
+                title: title,
+                price: price,
+                desc: "VIP MOD MENU"
+            };
+            openOrderModal(found.id);
+        }
+
+        function closeOrderModal() {
+            document.getElementById('order-modal').classList.add('hidden');
+        }
+
+        function adjustQuantity(delta) {
+            state.orderQuantity = Math.max(1, state.orderQuantity + delta);
+            document.getElementById('quantity-display').innerText = state.orderQuantity;
+            recalculateTotalPrice();
+        }
+
+        function recalculateTotalPrice() {
+            if (!state.selectedPanel) return;
+            const durationMult = parseFloat(document.getElementById('duration-select').value) || 1;
+            const unitPrice = state.selectedPanel.price * durationMult;
+            const total = unitPrice * state.orderQuantity;
+            document.getElementById('final-total-price').innerText = `৳ ${total} BDT`;
+            document.getElementById('gateway-pay-amount').innerText = `${total} BDT`;
+            document.getElementById('step2-amount').innerText = `${total} BDT`;
+            document.getElementById('exact-amount-label').innerText = `${total} BDT`;
+        }
+
+        function payWithWalletDirect() {
+            const durationMult = parseFloat(document.getElementById('duration-select').value) || 1;
+            const total = state.selectedPanel.price * durationMult * state.orderQuantity;
+
+            if (state.walletBalance < total) {
+                showToast("Insufficient Wallet Balance! Please add funds.", "error");
+                closeOrderModal();
+                openWalletModal();
+                return;
+            }
+
+            state.walletBalance -= total;
+            state.totalSpent += total;
+
+            const newKey = "PW-" + Math.random().toString(36).substring(2, 8).toUpperCase() + "-" + Math.random().toString(36).substring(2, 6).toUpperCase();
+            state.orders.unshift({
+                id: "ORD-" + Math.floor(10000 + Math.random() * 90000),
+                panelName: state.selectedPanel.title,
+                key: newKey,
+                expiry: "30 Days",
+                status: "ACTIVE"
+            });
+
+            state.transactions.unshift({
+                id: "TRX-" + Math.floor(10000 + Math.random() * 90000),
+                type: "PURCHASE",
+                amount: total,
+                provider: "WALLET",
+                date: "Just Now",
+                status: "SUCCESS"
+            });
+
+            updateUI();
+            closeOrderModal();
+            showToast("Order Successful! License key added.", "success");
+            openMyOrdersModal();
+        }
+
+        function proceedToPaymentGateway() {
+            closeOrderModal();
+            document.getElementById('payment-gateway-modal').classList.remove('hidden');
+            goToGatewayStep(1);
+        }
+
+        function closePaymentGateway() {
+            document.getElementById('payment-gateway-modal').classList.add('hidden');
+        }
+
+        function selectPaymentProvider(provider) {
+            state.selectedPaymentProvider = provider;
+            document.getElementById('selected-provider-label').innerText = provider;
+            showToast(`Selected ${provider} Payment Method`, "info");
+        }
+
+        function goToGatewayStep(stepNumber) {
+            document.getElementById('gateway-step-1').classList.add('hidden');
+            document.getElementById('gateway-step-2').classList.add('hidden');
+            document.getElementById('gateway-step-3').classList.add('hidden');
+            document.getElementById(`gateway-step-${stepNumber}`).classList.remove('hidden');
+        }
+
+        function submitTransactionVerification() {
+            const trxId = document.getElementById('trx-id-input').value.trim();
+            if (!trxId) {
+                showToast("Please enter a valid Transaction ID!", "error");
+                return;
+            }
+
+            const durationMult = parseFloat(document.getElementById('duration-select').value) || 1;
+            const total = (state.selectedPanel ? state.selectedPanel.price : 100) * durationMult * state.orderQuantity;
+
+            // Generate Order
+            const newKey = "PW-" + Math.random().toString(36).substring(2, 8).toUpperCase() + "-KEY";
+            if (state.selectedPanel) {
+                state.orders.unshift({
+                    id: "ORD-" + Math.floor(10000 + Math.random() * 90000),
+                    panelName: state.selectedPanel.title,
+                    key: newKey,
+                    expiry: "30 Days",
+                    status: "ACTIVE"
+                });
+            }
+
+            state.transactions.unshift({
+                id: trxId.toUpperCase(),
+                type: "PAYMENT",
+                amount: total,
+                provider: state.selectedPaymentProvider,
+                date: "Just Now",
+                status: "VERIFIED"
+            });
+
+            updateUI();
+            closePaymentGateway();
+            document.getElementById('trx-id-input').value = '';
+            showToast("Transaction Submitted! Verified successfully.", "success");
+            openMyOrdersModal();
+        }
+
+        function openWalletModal() {
+            document.getElementById('wallet-modal').classList.remove('hidden');
+            renderTransactionHistory();
+        }
+
+        function closeWalletModal() {
+            document.getElementById('wallet-modal').classList.add('hidden');
+        }
+
+        function setDepositPreset(amount) {
+            document.getElementById('custom-deposit-input').value = amount;
+        }
+
+        function initiateDepositGateway() {
+            const val = parseFloat(document.getElementById('custom-deposit-input').value);
+            if (!val || val < 10) {
+                showToast("Enter a minimum amount of ৳10 BDT", "error");
+                return;
+            }
+
+            state.walletBalance += val;
+            state.totalDeposited += val;
+
+            state.transactions.unshift({
+                id: "DEP-" + Math.floor(10000 + Math.random() * 90000),
+                type: "DEPOSIT",
+                amount: val,
+                provider: "bKash Direct",
+                date: "Just Now",
+                status: "SUCCESS"
+            });
+
+            updateUI();
+            renderTransactionHistory();
+            document.getElementById('custom-deposit-input').value = '';
+            showToast(`৳${val} BDT Added to Wallet Successfully!`, "success");
+        }
+
+        function renderTransactionHistory() {
+            const container = document.getElementById('tx-history-list');
+            if (state.transactions.length === 0) {
+                container.innerHTML = '<p class="text-xs text-gray-500 text-center py-4">No recent transactions</p>';
+                return;
+            }
+
+            container.innerHTML = state.transactions.map(t => `
+                <div class="bg-darkBg p-3 rounded-xl border border-darkBorder flex items-center justify-between">
+                    <div>
+                        <div class="font-orbitron font-bold text-xs text-white">${t.id} (${t.provider})</div>
+                        <div class="text-[10px] text-gray-400">${t.date}</div>
+                    </div>
+                    <div class="text-right">
+                        <div class="font-orbitron font-bold text-xs ${t.type === 'DEPOSIT' ? 'text-green-400' : 'text-neonRed'}">
+                            ${t.type === 'DEPOSIT' ? '+' : '-'}৳${t.amount}
+                        </div>
+                        <span class="text-[9px] px-2 py-0.5 rounded bg-green-500/20 text-green-400 font-orbitron">${t.status}</span>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function openMyOrdersModal() {
+            document.getElementById('orders-modal').classList.remove('hidden');
+            const container = document.getElementById('my-orders-list');
+
+            if (state.orders.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center py-12">
+                        <i class="fa-solid fa-box-open text-4xl text-gray-600 mb-3"></i>
+                        <p class="font-orbitron text-sm text-gray-400">No active keys purchased yet.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = state.orders.map(o => `
+                <div class="bg-darkBg p-4 rounded-2xl border border-darkBorder">
+                    <div class="flex justify-between items-center mb-2">
+                        <span class="font-orbitron font-bold text-sm text-white">${o.panelName}</span>
+                        <span class="text-[10px] font-orbitron px-2.5 py-1 rounded-full bg-green-500/20 text-green-400 border border-green-500/30">${o.status}</span>
+                    </div>
+                    <div class="bg-darkCard p-3 rounded-xl border border-darkBorder flex items-center justify-between mb-3">
+                        <span class="font-mono text-xs text-neonCyan tracking-wider">${o.key}</span>
+                        <button onclick="copyToClipboard('${o.key}', 'License Key Copied!')" class="text-xs text-neonRed hover:text-white font-orbitron font-bold flex items-center gap-1">
+                            <i class="fa-regular fa-copy"></i> Copy Key
+                        </button>
+                    </div>
+                    <div class="flex justify-between items-center text-xs">
+                        <span class="text-gray-400">Expires in: <strong class="text-white">${o.expiry}</strong></span>
+                        <a href="javascript:void(0)" onclick="showToast('Starting APK Download...', 'info')" class="text-neonCyan hover:underline font-orbitron text-[11px]">
+                            <i class="fa-solid fa-download"></i> Download Panel Setup
+                        </a>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function closeMyOrdersModal() {
+            document.getElementById('orders-modal').classList.add('hidden');
+        }
+
+        function openLoginModal() {
+            document.getElementById('login-modal').classList.remove('hidden');
+        }
+
+        function closeLoginModal() {
+            document.getElementById('login-modal').classList.add('hidden');
+        }
+
+        function handleLoginSubmit(e) {
+            e.preventDefault();
+            const email = document.getElementById('login-email').value;
+            state.userLoggedIn = true;
+            state.userName = email.split('@')[0].toUpperCase();
+            updateUI();
+            closeLoginModal();
+            showToast(`Welcome Back, ${state.userName}!`, "success");
+        }
+
+        function simulateGoogleLogin() {
+            state.userLoggedIn = true;
+            state.userName = "GOOGLE USER";
+            updateUI();
+            closeLoginModal();
+            showToast("Logged in with Google!", "success");
+        }
+
+        function openDemoModal(title) {
+            document.getElementById('demo-modal-title').innerText = `${title} - Video Demo`;
+            document.getElementById('demo-modal').classList.remove('hidden');
+        }
+
+        function closeDemoModal() {
+            document.getElementById('demo-modal').classList.add('hidden');
+        }
+
+        function updateUI() {
+            document.getElementById('header-balance-text').innerText = `৳ ${state.walletBalance} BDT`;
+            document.getElementById('wallet-deposited-text').innerText = `৳ ${state.totalDeposited}`;
+            document.getElementById('wallet-spent-text').innerText = `৳ ${state.totalSpent}`;
+            document.getElementById('user-btn-label').innerText = state.userLoggedIn ? state.userName : "Login";
+            document.getElementById('mobile-username-text').innerText = state.userLoggedIn ? state.userName : "Guest User";
+        }
+
+        function toggleMobileMenu() {
+            const drawer = document.getElementById('mobile-menu-drawer');
+            drawer.classList.toggle('hidden');
+        }
+
+        // Fallback Clipboard copy for iframe environment compatibility
+        function copyToClipboard(text, successMsg) {
+            const textarea = document.createElement('textarea');
+            textarea.value = text;
+            textarea.style.position = 'fixed';
+            textarea.style.opacity = '0';
+            document.body.appendChild(textarea);
+            textarea.select();
+            try {
+                document.execCommand('copy');
+                showToast(successMsg, 'success');
+            } catch (err) {
+                showToast('Failed to copy', 'error');
+            }
+            document.body.removeChild(textarea);
+        }
+
+        function showToast(message, type = "info") {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+
+            let iconClass = "fa-circle-info text-blue-400";
+            let borderClass = "border-blue-500/40";
+
+            if (type === "success") {
+                iconClass = "fa-circle-check text-green-400";
+                borderClass = "border-green-500/40";
+            } else if (type === "error") {
+                iconClass = "fa-circle-exclamation text-neonRed";
+                borderClass = "border-neonRed/40";
+            }
+
+            toast.className = `glass-panel px-4 py-3 rounded-2xl border ${borderClass} shadow-2xl flex items-center gap-3 toast-enter pointer-events-auto min-w-[240px]`;
+            toast.innerHTML = `
+                <i class="fa-solid ${iconClass} text-lg"></i>
+                <span class="font-orbitron text-xs font-semibold text-white flex-1">${message}</span>
+            `;
+
+            container.appendChild(toast);
+
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transform = 'translateX(100%)';
+                toast.style.transition = 'all 0.3s ease-out';
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+    </script>
+</body>
+</html>
+```
